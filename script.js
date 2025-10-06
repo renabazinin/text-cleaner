@@ -182,12 +182,23 @@ function updateAutoEnable() {
 const suggestMin = document.getElementById('suggestMin');
 const suggestMinVal = document.getElementById('suggestMinVal');
 const suggestMinValHint = document.getElementById('suggestMinValHint');
+const suggestRepeats = document.getElementById('suggestRepeats');
+const suggestRepeatsVal = document.getElementById('suggestRepeatsVal');
+const suggestRepeatsValHint = document.getElementById('suggestRepeatsValHint');
 if (suggestMin && suggestMinVal) {
   suggestMinVal.textContent = suggestMin.value;
   if (suggestMinValHint) suggestMinValHint.textContent = suggestMin.value;
   suggestMin.addEventListener('input', () => {
     suggestMinVal.textContent = suggestMin.value;
     if (suggestMinValHint) suggestMinValHint.textContent = suggestMin.value;
+  });
+}
+if (suggestRepeats && suggestRepeatsVal) {
+  suggestRepeatsVal.textContent = suggestRepeats.value;
+  if (suggestRepeatsValHint) suggestRepeatsValHint.textContent = suggestRepeats.value;
+  suggestRepeats.addEventListener('input', () => {
+    suggestRepeatsVal.textContent = suggestRepeats.value;
+    if (suggestRepeatsValHint) suggestRepeatsValHint.textContent = suggestRepeats.value;
   });
 }
 
@@ -218,9 +229,10 @@ suggestBtn.addEventListener("click", () => {
     }
   }
 
-  // Only suggest phrases that occur at least 3 times
-  const suggested = Object.keys(counts).filter(k => counts[k] >= 3);
-  if (!suggested.length) return showInlineMessage(`No repeated ${minPhraseLen}+ word phrases found to suggest.`, 'info');
+  // Only suggest phrases that occur at least N times (configurable)
+  const minRepeats = Number(suggestRepeats && suggestRepeats.value || 4);
+  const suggested = Object.keys(counts).filter(k => counts[k] >= minRepeats);
+  if (!suggested.length) return showInlineMessage(`No repeated ${minPhraseLen}+ word phrases found to suggest (min ${minRepeats} repeats).`, 'info');
 
   // Append suggestions without overriding existing rows. Avoid duplicates.
   const existing = new Set(getRemoveRows().map(r => r.text.toLowerCase()));

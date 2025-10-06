@@ -89,6 +89,14 @@
                   <input id="suggestMin" type="range" min="2" max="10" value="3" class="slider">
                   <div class="slider-hint">Suggest will only offer phrases with <strong id="suggestMinValHint">3</strong> words or more.</div>
                 </div>
+                <div class="slider-control">
+                  <label class="slider-label">
+                    <span class="label-text">Minimum repeats (Suggest)</span>
+                    <span class="slider-value" id="suggestRepeatsVal">4</span>
+                  </label>
+                  <input id="suggestRepeats" type="range" min="2" max="10" value="4" class="slider">
+                  <div class="slider-hint">Suggest will only return phrases that repeat <strong id="suggestRepeatsValHint">4</strong> times or more.</div>
+                </div>
                 <div id="removeRowsContainer" class="remove-rows">
                   <div class="remove-row">
                     <input class="remove-input" type="text" placeholder="Enter sentence or phrase to remove...">
