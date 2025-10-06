@@ -30,6 +30,7 @@
     <div>
       <label for="input"><strong>Input</strong></label>
       <textarea id="input" placeholder="Paste your text here..."></textarea>
+  <div id="inlineMsg" class="inline-message" aria-live="polite" style="display:none"></div>
       <!-- Action buttons -->
       <div class="action-bar">
         <button id="cleanBtn" class="btn-primary">Clean</button>
@@ -75,20 +76,25 @@
                 <button id="suggestBtn" class="btn-icon" title="Auto-suggest repeated sentences">
                   <span class="icon">Suggest</span>
                 </button>
+                <button id="clearRemoveBtn" class="btn-icon" title="Clear all removal rows">
+                  <span class="icon">Clear All</span>
+                </button>
               </div>
     
-              <div id="removeRowsContainer" class="remove-rows">
-              
-                <div class="remove-row">
-                  <input class="remove-input" type="text" placeholder="Enter sentence or phrase to remove...">
-                  <button class="row-toggle-case toggle switch small" aria-pressed="false" title="Case sensitive">
-                    <span class="switch-track"><span class="switch-knob"></span></span>
-                    <span class="switch-label">Off</span>
-                  </button>
-                 <button class="remove-row-delete" title="Remove this rule">Remove</button>
+                <div class="slider-control">
+                  <label class="slider-label">
+                    <span class="label-text">Minimum words per phrase (Suggest)</span>
+                    <span class="slider-value" id="suggestMinVal">3</span>
+                  </label>
+                  <input id="suggestMin" type="range" min="2" max="10" value="3" class="slider">
+                  <div class="slider-hint">Suggest will only offer phrases with <strong id="suggestMinValHint">3</strong> words or more.</div>
                 </div>
-               
-              </div>
+                <div id="removeRowsContainer" class="remove-rows">
+                  <div class="remove-row">
+                    <input class="remove-input" type="text" placeholder="Enter sentence or phrase to remove...">
+                    <button class="remove-row-delete" title="Remove this rule">Remove</button>
+                  </div>
+                </div>
             </div>
           </div>
         </div>

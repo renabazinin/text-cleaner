@@ -17,6 +17,25 @@ const output = document.getElementById("output");
 const cleanBtn = document.getElementById("cleanBtn");
 const copyBtn  = document.getElementById("copyBtn");
 const clearBtn = document.getElementById("clearBtn");
+const inlineMsg = document.getElementById('inlineMsg');
+
+function showInlineMessage(msg, type = 'info', timeout = 5000) {
+  if (!inlineMsg) return console[type === 'error' ? 'error' : 'log'](msg);
+  inlineMsg.textContent = msg;
+  inlineMsg.className = 'inline-message ' + (type === 'error' ? 'error' : 'info');
+  inlineMsg.style.display = 'inline-block';
+  clearTimeout(inlineMsg._dismiss);
+  inlineMsg._dismiss = setTimeout(() => {
+    inlineMsg.style.display = 'none';
+  }, timeout);
+}
+
+function clearInlineMessage() {
+  if (!inlineMsg) return;
+  inlineMsg.style.display = 'none';
+  inlineMsg.textContent = '';
+  clearTimeout(inlineMsg._dismiss);
+}
 
 // Downcase UI (toggle button)
 const downcaseToggle = document.getElementById('downcaseToggle');
@@ -45,10 +64,10 @@ copyBtn.addEventListener("click", async () => {
     copyBtn.textContent = "Copied!";
     setTimeout(() => (copyBtn.textContent = "Copy Output"), 900);
   } catch {
-    // Fallback: select so user can Ctrl/Cmd+C
+    // Fallback: select so user can Ctrl/Cmd+C and show inline message
     output.focus();
     output.select();
-    alert("Clipboard not available. Text selected—press Ctrl/Cmd+C to copy.");
+    showInlineMessage("Clipboard not available. Text selected — press Ctrl/Cmd+C to copy.", 'error');
   }
 });
 
@@ -79,7 +98,7 @@ function setToggleState(btn, state) {
   }
 }
 
-function createRemoveRow(value = "", caseChecked = false) {
+function createRemoveRow(value = "") {
   const row = document.createElement("div");
   row.className = "remove-row";
 
@@ -88,34 +107,6 @@ function createRemoveRow(value = "", caseChecked = false) {
   input.className = "remove-input";
   input.placeholder = "Enter sentence or phrase to remove...";
   input.value = value;
-
-  // per-row case toggle (button)
-  const caseBtn = document.createElement('button');
-  caseBtn.type = 'button';
-  caseBtn.className = 'row-toggle-case toggle switch small';
-  caseBtn.setAttribute('aria-pressed', caseChecked ? 'true' : 'false');
-  caseBtn.title = 'Case sensitive';
-  
-  // Build switch structure: track > knob + label
-  const track = document.createElement('span');
-  track.className = 'switch-track';
-  const knob = document.createElement('span');
-  knob.className = 'switch-knob';
-  knob.textContent = caseChecked ? '✓' : '×';
-  knob.setAttribute('aria-label', caseChecked ? 'Enabled' : 'Disabled');
-  track.appendChild(knob);
-  
-  const label = document.createElement('span');
-  label.className = 'switch-label';
-  label.textContent = caseChecked ? 'On' : 'Off';
-  
-  caseBtn.appendChild(track);
-  caseBtn.appendChild(label);
-  
-  caseBtn.addEventListener('click', () => {
-    const pressed = caseBtn.getAttribute('aria-pressed') === 'true';
-    setToggleState(caseBtn, !pressed);
-  });
 
   const del = document.createElement("button");
   del.type = "button";
@@ -131,7 +122,6 @@ function createRemoveRow(value = "", caseChecked = false) {
   input.addEventListener("input", () => updateAutoEnable());
 
   row.appendChild(input);
-  row.appendChild(caseBtn);
   row.appendChild(del);
   return row;
 }
@@ -142,10 +132,8 @@ function createRemoveRow(value = "", caseChecked = false) {
   const existing = Array.from(removeRowsContainer.querySelectorAll('.remove-row'));
   const rowsData = existing.map(r => {
     const inputEl = r.querySelector('.remove-input');
-    const btn = r.querySelector('.row-toggle-case');
     const text = inputEl ? (inputEl.value || '').trim() : '';
-    const casePressed = btn && btn.getAttribute('aria-pressed') === 'true';
-    return { text, casePressed };
+    return { text };
   });
 
   // Clear and rebuild using the managed constructor so event handlers are attached
@@ -154,7 +142,7 @@ function createRemoveRow(value = "", caseChecked = false) {
     removeRowsContainer.appendChild(createRemoveRow());
   } else {
     for (const rd of rowsData) {
-      removeRowsContainer.appendChild(createRemoveRow(rd.text, rd.casePressed));
+      removeRowsContainer.appendChild(createRemoveRow(rd.text));
     }
   }
 })();
@@ -172,9 +160,7 @@ addRemoveRowBtn.addEventListener('click', () => {
 function getRemoveRows() {
   return Array.from(removeRowsContainer.querySelectorAll('.remove-row')).map(r => {
     const input = r.querySelector('.remove-input');
-    const btn = r.querySelector('.row-toggle-case');
-    const pressed = btn && btn.getAttribute('aria-pressed') === 'true';
-    return { text: (input && input.value || '').trim(), caseSensitive: !!pressed };
+    return { text: (input && input.value || '').trim() };
   }).filter(x => x.text);
 }
 
@@ -192,29 +178,69 @@ function updateAutoEnable() {
 
 // Suggest repeated sentences or lines to remove using a simple heuristic:
 // find lines (split by punctuation or line breaks) that repeat 2+ times.
-suggestBtn.addEventListener("click", () => {
-  const text = input.value || "";
-  if (!text) return alert("Paste or enter text in the Input area first to get suggestions.");
+// Suggest slider UI
+const suggestMin = document.getElementById('suggestMin');
+const suggestMinVal = document.getElementById('suggestMinVal');
+const suggestMinValHint = document.getElementById('suggestMinValHint');
+if (suggestMin && suggestMinVal) {
+  suggestMinVal.textContent = suggestMin.value;
+  if (suggestMinValHint) suggestMinValHint.textContent = suggestMin.value;
+  suggestMin.addEventListener('input', () => {
+    suggestMinVal.textContent = suggestMin.value;
+    if (suggestMinValHint) suggestMinValHint.textContent = suggestMin.value;
+  });
+}
 
-  const candidates = text.split(/[\.\!\?\n]+/).map(s => s.trim()).filter(Boolean);
+suggestBtn.addEventListener("click", () => {
+  let text = input.value || "";
+  if (!text) return showInlineMessage("Paste or enter text in the Input area first to get suggestions.", 'error');
+  if (!text) return showInlineMessage("Paste or enter text in the Input area first to get suggestions.", 'error');
+
+  // Collapse all whitespace (line breaks, tabs, multiple spaces) into single spaces
+  text = text.replace(/\s+/g, " ").trim();
+
+  // Split into words
+  const words = text.split(' ');
+  const minPhraseLen = Number(suggestMin && suggestMin.value || 3);
+  const maxPhraseLen = Math.max(minPhraseLen, 5); // limit window size for performance
   const counts = Object.create(null);
-  for (const s of candidates) {
-    const key = s.toLowerCase();
-    counts[key] = (counts[key] || 0) + 1;
+  const phrases = [];
+
+  // Sliding window: extract all phrases with at least minPhraseLen words
+  for (let win = minPhraseLen; win <= maxPhraseLen; win++) {
+    for (let i = 0; i <= words.length - win; i++) {
+      const phraseArr = words.slice(i, i + win);
+      const phrase = phraseArr.join(' ');
+      if (!phrase.match(/\w{2,}/)) continue; // skip if not enough word chars
+      const key = phrase.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+      phrases[key] = phrase; // preserve original case
+    }
   }
 
+  // Only suggest phrases that occur at least 3 times
   const suggested = Object.keys(counts).filter(k => counts[k] >= 3);
-  if (!suggested.length) return alert("No repeated sentences found to suggest.");
+  if (!suggested.length) return showInlineMessage(`No repeated ${minPhraseLen}+ word phrases found to suggest.`, 'info');
 
   // Append suggestions without overriding existing rows. Avoid duplicates.
   const existing = new Set(getRemoveRows().map(r => r.text.toLowerCase()));
-  for (const s of suggested) {
-    if (existing.has(s)) continue;
-    const found = candidates.find(c => c.toLowerCase() === s) || s;
-    removeRowsContainer.appendChild(createRemoveRow(found, false));
+  for (const k of suggested) {
+    if (existing.has(k)) continue;
+    const found = phrases[k] || k;
+    removeRowsContainer.appendChild(createRemoveRow(found));
   }
   updateAutoEnable();
 });
+
+// Clear all removal rows handler
+const clearRemoveBtn = document.getElementById('clearRemoveBtn');
+if (clearRemoveBtn) {
+  clearRemoveBtn.addEventListener('click', () => {
+    removeRowsContainer.innerHTML = '';
+    updateAutoEnable();
+    showInlineMessage('All removal rules cleared.', 'info');
+  });
+}
 
 // Update the Clean button flow to remove any listed sentences when enabled
 cleanBtn.addEventListener("click", () => {
@@ -228,9 +254,9 @@ cleanBtn.addEventListener("click", () => {
       const phrase = r.text;
       if (!phrase) continue;
       const esc = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const flags = r.caseSensitive ? 'g' : 'gi';
-      result = result.replace(new RegExp(esc, flags), "");
+      result = result.replace(new RegExp(esc, 'gi'), "");
     }
+    // Clean up extra spaces after removals
     result = result.replace(/ {2,}/g, " ").trim();
   }
 

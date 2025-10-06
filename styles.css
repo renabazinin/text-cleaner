@@ -67,6 +67,25 @@ textarea:focus {
 
 textarea::placeholder { color: rgba(230,238,246,0.45); }
 
+/* Inline message area shown under Input for errors and info (replaces alerts) */
+.inline-message {
+  margin-top: .5rem;
+  padding: .6rem .75rem;
+  border-radius: 8px;
+  font-size: .95rem;
+  display: inline-block;
+}
+.inline-message.error {
+  background: rgba(239,68,68,0.08);
+  color: rgba(239,68,68,0.95);
+  border: 1px solid rgba(239,68,68,0.12);
+}
+.inline-message.info {
+  background: rgba(59,130,246,0.06);
+  color: rgba(96,165,250,0.95);
+  border: 1px solid rgba(59,130,246,0.08);
+}
+
 .row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: center; }
 
 button {
