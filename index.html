@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Text Cleaner — remove line breaks & downcase CAPSed words (len ≥ 4)</title>
+  <meta name="description" content="Text Cleaner removes line breaks and downcases ALL-CAPS words (configurable minimum length) directly in your browser—fast, private, and free.">
+  <meta name="short-description" content="Text Cleaner is a tiny browser tool that strips line breaks and converts shouty ALL-CAPS words (configurable minimum length) to lowercase.">
+  <meta name="author" content="Text Cleaner">
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="Text Cleaner — Instantly tidy your text">
+  <meta property="og:description" content="Remove line breaks and downcase ALL-CAPS words (configurable minimum length) in one click. Runs in your browser—no uploads.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Text Cleaner — Instantly tidy your text">
+  <meta name="twitter:description" content="Remove line breaks and downcase ALL-CAPS words (configurable minimum length) in one click. Fast, private, and free.">
+
+  <!-- Favicons -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="text-cleaner-logo.svg">
+  <meta name="theme-color" content="#071023">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Text Cleaner</h1>
+  <p class="tagline">Instantly tidy your text.</p>
+  <p class="one-liner">Remove line breaks and automatically downcase ALL-CAPS words (configurable minimum length; default 4) in one click.</p>
+
+  <div class="grid">
+    <div>
+      <label for="input"><strong>Input</strong></label>
+      <textarea id="input" placeholder="Paste your text here..."></textarea>
+      <!-- Action buttons -->
+      <div class="action-bar">
+        <button id="cleanBtn" class="btn-primary">Clean</button>
+        <button id="copyBtn" class="btn-secondary" title="Copy output to clipboard">Copy</button>
+        <button id="clearBtn" class="btn-secondary" title="Clear both boxes">Clear</button>
+      </div>
+
+      <!-- Configuration sections -->
+      <div class="config-container">
+        
+        <!-- Downcase configuration card -->
+        <div class="config-card">
+          <div class="config-header">
+            <h3 class="config-title">Downcase ALL-CAPS</h3>
+            <button id="downcaseToggle" class="toggle switch" aria-pressed="true" title="Toggle downcasing">
+              <span class="switch-track"><span class="switch-knob"></span></span>
+              <span class="switch-label">On</span>
+            </button>
+          </div>
+          <div class="config-body">
+            <div class="slider-control">
+              <label class="slider-label">
+                <span class="label-text">Minimum word length</span>
+                <span class="slider-value" id="downcaseVal">4</span>
+              </label>
+              <input id="downcaseMin" type="range" min="2" max="20" value="4" class="slider">
+              <div class="slider-hint">Words with <strong id="downcaseValHint">4</strong> or more capital letters will be lowercased</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remove sentences card -->
+        <div class="config-card">
+          <div class="config-header">
+            <h3 class="config-title">Remove Sentences</h3>
+          </div>
+          <div class="config-body">
+            <div class="remove-controls">
+              <div class="button-group">
+                <button id="addRemoveRowBtn" class="btn-icon" title="Add removal row">
+                  <span class="icon">Add</span>
+                </button>
+                <button id="suggestBtn" class="btn-icon" title="Auto-suggest repeated sentences">
+                  <span class="icon">Suggest</span>
+                </button>
+              </div>
+    
+              <div id="removeRowsContainer" class="remove-rows">
+              
+                <div class="remove-row">
+                  <input class="remove-input" type="text" placeholder="Enter sentence or phrase to remove...">
+                  <button class="row-toggle-case toggle switch small" aria-pressed="false" title="Case sensitive">
+                    <span class="switch-track"><span class="switch-knob"></span></span>
+                    <span class="switch-label">Off</span>
+                  </button>
+                 <button class="remove-row-delete" title="Remove this rule">Remove</button>
+                </div>
+               
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <label for="output"><strong>Output</strong></label>
+      <textarea id="output" readonly placeholder="Result will appear here…"></textarea>
+    </div>
+  </div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
