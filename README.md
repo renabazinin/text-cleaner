@@ -14,11 +14,6 @@ Live demo: https://renabazinin.github.io/text-cleaner/
 - Per-row removal rules (add, suggest, remove, clear all).
 - Inline error/info messaging (no blocking alerts).
 - Copy result to clipboard.
-
-## License
-
-No license file included. Add a `LICENSE` (for example MIT) if you want to publish this project under a specific license.
-
 ---
 
 Built with ♥ — hosted: https://renabazinin.github.io/text-cleaner/
